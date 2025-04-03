@@ -6,7 +6,7 @@ const baseURL = 'https://api.openf1.org/v1';
 
 export const fetchCurrentSession = async () => {
   try {
-    const response = await axios.get(`${baseURL}/sessions?current=true`);
+    const response = await axios.get(`${baseURL}/sessions`, { params: { current: true } });
     return response.data[0]; // Retourne la session actuelle
   } catch (error) {
     console.error('Erreur lors de la récupération de la session actuelle:', error);
@@ -16,13 +16,9 @@ export const fetchCurrentSession = async () => {
 
 export const fetchNextSession = async () => {
   try {
-    // Récupérer la date actuelle
     const currentDate = new Date();
-    
-    // Récupérer toutes les sessions futures
     const response = await axios.get(`${baseURL}/sessions`);
     
-    // Trier et trouver la prochaine session
     const sessions = response.data
       .filter(session => new Date(session.date) > currentDate)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -36,7 +32,9 @@ export const fetchNextSession = async () => {
 
 export const fetchDriverStandings = async (year = new Date().getFullYear()) => {
   try {
-    const response = await axios.get(`${baseURL}/drivers/standings?year=${year}`);
+    const response = await axios.get(`${baseURL}/drivers/standings`, {
+      params: { year, session_key: 'latest' }  // Ajout de session_key=latest
+    });
     return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des classements des pilotes:', error);
@@ -46,7 +44,9 @@ export const fetchDriverStandings = async (year = new Date().getFullYear()) => {
 
 export const fetchConstructorStandings = async (year = new Date().getFullYear()) => {
   try {
-    const response = await axios.get(`${baseURL}/constructors/standings?year=${year}`);
+    const response = await axios.get(`${baseURL}/constructors/standings`, {
+      params: { year, session_key: 'latest' }  // Ajout de session_key=latest
+    });
     return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des classements des constructeurs:', error);
@@ -56,7 +56,7 @@ export const fetchConstructorStandings = async (year = new Date().getFullYear())
 
 export const fetchSessionResults = async (sessionId) => {
   try {
-    const response = await axios.get(`${baseURL}/results?session_key=${sessionId}`);
+    const response = await axios.get(`${baseURL}/results`, { params: { session_key: sessionId } });
     return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des résultats de la session:', error);
@@ -66,7 +66,9 @@ export const fetchSessionResults = async (sessionId) => {
 
 export const fetchDriverLapTimes = async (sessionId, driverId) => {
   try {
-    const response = await axios.get(`${baseURL}/laps?session_key=${sessionId}&driver_number=${driverId}`);
+    const response = await axios.get(`${baseURL}/laps`, {
+      params: { session_key: sessionId, driver_number: driverId }
+    });
     return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des temps au tour:', error);
@@ -76,7 +78,9 @@ export const fetchDriverLapTimes = async (sessionId, driverId) => {
 
 export const fetchTeamLapTimes = async (sessionId, teamId) => {
   try {
-    const response = await axios.get(`${baseURL}/laps?session_key=${sessionId}&team_id=${teamId}`);
+    const response = await axios.get(`${baseURL}/laps`, {
+      params: { session_key: sessionId, team_id: teamId }
+    });
     return response.data;
   } catch (error) {
     console.error('Erreur lors de la récupération des temps au tour par équipe:', error);
