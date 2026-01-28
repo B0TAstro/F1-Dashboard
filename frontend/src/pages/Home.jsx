@@ -1,126 +1,130 @@
 // pages/Home.jsx
-
 import React, { useState, useEffect } from 'react';
-import { fetchCurrentSession, fetchNextSession } from '../api/openF1Api';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchMeetings, fetchDriverStandings, fetchConstructorStandings } from '../api/openF1Api';
+import { F1_2026_TEAMS, F1_2026_DRIVERS } from '../constants/f1Data';
+import PageHeader from '../components/PageHeader';
+import RaceCard from '../components/RaceCard';
+import { DriverStandingRow, ConstructorStandingRow } from '../components/StandingRow';
 
 function Home() {
-    const [currentSession, setCurrentSession] = useState(null);
-    const [nextSession, setNextSession] = useState(null);
+    const [lastRaces, setLastRaces] = useState([]);
+    const [nextRace, setNextRace] = useState(null);
+    const [driverStandings, setDriverStandings] = useState([]);
+    const [constructorStandings, setConstructorStandings] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const [currentYear] = useState(new Date().getFullYear());
 
     useEffect(() => {
-        const fetchData = async () => {
+        const loadData = async () => {
+            setLoading(true);
             try {
-                setLoading(true);
-                const currentData = await fetchCurrentSession().catch(() => null);
-                const nextData = await fetchNextSession().catch(() => null);
+                // Fetch last 3 races from previous year
+                const prevYearMeetings = await fetchMeetings(currentYear - 1).catch(() => []);
+                const pastMeetings = prevYearMeetings
+                    .filter(m => new Date(m.date_start) < new Date())
+                    .sort((a, b) => new Date(b.date_start) - new Date(a.date_start))
+                    .slice(0, 3)
+                    .reverse();
+                setLastRaces(pastMeetings);
 
-                setCurrentSession(currentData);
-                setNextSession(nextData);
-                setLoading(false);
+                // Fetch next race from current year
+                const currentYearMeetings = await fetchMeetings(currentYear).catch(() => []);
+                const futureMeetings = currentYearMeetings
+                    .filter(m => new Date(m.date_start) > new Date())
+                    .sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
+                setNextRace(futureMeetings[0] || null);
+
+                // Fetch Standings
+                const drivers = await fetchDriverStandings(currentYear).catch(() => []);
+                const constructors = await fetchConstructorStandings(currentYear).catch(() => []);
+
+                if (drivers.length > 0) {
+                    setDriverStandings(drivers.slice(0, 4));
+                } else {
+                    const fallbackDrivers = F1_2026_DRIVERS
+                        .map((d) => ({ ...d, points: 0 }))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .slice(0, 4);
+                    setDriverStandings(fallbackDrivers);
+                }
+
+                if (constructors.length > 0) {
+                    setConstructorStandings(constructors.slice(0, 4));
+                } else {
+                    const fallbackTeams = F1_2026_TEAMS
+                        .map((t) => ({ ...t, points: 0 }))
+                        .sort((a, b) => a.name.localeCompare(b.name))
+                        .slice(0, 4);
+                    setConstructorStandings(fallbackTeams);
+                }
             } catch (err) {
-                setError('Erreur lors de la récupération des données');
-                setLoading(false);
+                console.error('Error loading home data:', err);
             }
+            setLoading(false);
         };
+        loadData();
+    }, [currentYear]);
 
-        fetchData();
-    }, []);
-
-    // Données de démonstration pour le graphique
-    const demoData = [
-        { name: 'Australie', Hamilton: 25, Verstappen: 18, Leclerc: 15, Pérez: 12 },
-        { name: 'Bahreïn', Hamilton: 18, Verstappen: 25, Leclerc: 15, Pérez: 10 },
-        { name: 'Arabie S.', Hamilton: 15, Verstappen: 25, Leclerc: 18, Pérez: 12 },
-        { name: 'Italie', Hamilton: 18, Verstappen: 25, Leclerc: 10, Pérez: 12 },
-        { name: 'Miami', Hamilton: 25, Verstappen: 18, Leclerc: 15, Pérez: 10 },
-    ];
-
-    if (loading) return <div className="flex justify-center items-center h-64">Chargement des données...</div>;
-    if (error) return <div className="text-red-500 text-center">{error}</div>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <div className="text-2xl font-bold italic text-white animate-pulse">Chargement...</div>
+            </div>
+        );
+    }
 
     return (
-        <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4">Session en cours</h2>
-                    {currentSession ? (
-                        <div>
-                            <p><span className="font-semibold">Grand Prix:</span> {currentSession.meeting_name}</p>
-                            <p><span className="font-semibold">Circuit:</span> {currentSession.circuit_short_name}</p>
-                            <p><span className="font-semibold">Type:</span> {currentSession.session_type}</p>
-                            <p><span className="font-semibold">Date:</span> {new Date(currentSession.date).toLocaleDateString()}</p>
-                        </div>
+        <div className="space-y-8 animate-fade-in-up">
+            <PageHeader title="Accueil" rightElement={currentYear} />
+
+            {/* RACES GRID */}
+            <section className="bg-[#1f1f29] rounded-xl p-6 border border-[#333]">
+                <h2 className="text-lg font-bold text-gray-400 mb-4 flex items-center gap-2">
+                    🏁 <span className="uppercase tracking-widest">Dernières Courses</span>
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {lastRaces.map((race, index) => (
+                        <RaceCard key={race.meeting_key || index} race={race} isNext={false} raceNumber={`R${index + 1}`} />
+                    ))}
+                    {nextRace ? (
+                        <RaceCard race={nextRace} isNext={true} raceNumber="NEXT" />
                     ) : (
-                        <p>Aucune session en cours</p>
+                        <div className="bg-gradient-to-br from-[#15151E] to-[#1f1f29] rounded-lg p-4 border border-dashed border-[#444] flex items-center justify-center min-h-[120px]">
+                            <span className="text-gray-500 italic">Calendrier 2026 à venir...</span>
+                        </div>
                     )}
                 </div>
+            </section>
 
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4">Prochaine session</h2>
-                    {nextSession ? (
-                        <div>
-                            <p><span className="font-semibold">Grand Prix:</span> {nextSession.meeting_name}</p>
-                            <p><span className="font-semibold">Circuit:</span> {nextSession.circuit_short_name}</p>
-                            <p><span className="font-semibold">Type:</span> {nextSession.session_type}</p>
-                            <p><span className="font-semibold">Date:</span> {new Date(nextSession.date).toLocaleDateString()}</p>
-                        </div>
-                    ) : (
-                        <p>Aucune prochaine session trouvée</p>
-                    )}
-                </div>
-            </div>
-
-            <div className="bg-white rounded-lg shadow-md p-6">
-                <h2 className="text-xl font-bold mb-4">Évolution du championnat</h2>
-                <div className="h-64">
-                    <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={demoData}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="Hamilton" stroke="#3b82f6" />
-                            <Line type="monotone" dataKey="Verstappen" stroke="#ef4444" />
-                            <Line type="monotone" dataKey="Leclerc" stroke="#eab308" />
-                            <Line type="monotone" dataKey="Pérez" stroke="#10b981" />
-                        </LineChart>
-                    </ResponsiveContainer>
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4">Actualités F1</h2>
-                    <div className="space-y-4">
-                        <div className="pb-2 border-b">
-                            <h3 className="font-semibold">Les nouveaux règlements 2025 dévoilés</h3>
-                            <p className="text-gray-600">La FIA a présenté les changements majeurs pour la saison...</p>
-                        </div>
-                        <div className="pb-2 border-b">
-                            <h3 className="font-semibold">Transfert de pilotes : qui va où ?</h3>
-                            <p className="text-gray-600">Le marché des transferts s'anime avec plusieurs changements...</p>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold">GP d'Australie : retour sur la course</h3>
-                            <p className="text-gray-600">Une course mouvementée à Melbourne avec plusieurs rebondissements...</p>
-                        </div>
+            {/* STANDINGS GRID */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <section className="bg-[#1f1f29] rounded-xl p-6 border border-[#333]">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-bold text-gray-400 flex items-center gap-2">
+                            🏆 <span className="uppercase tracking-widest">Championnat Pilotes</span>
+                        </h2>
+                        <span className="text-[var(--f1-red)] text-sm font-bold">Tout voir →</span>
                     </div>
-                </div>
+                    <div className="space-y-3">
+                        {driverStandings.map((driver, index) => (
+                            <DriverStandingRow key={driver.code || index} driver={driver} position={index + 1} compact />
+                        ))}
+                    </div>
+                </section>
 
-                <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-bold mb-4">Faits marquants de la saison</h2>
-                    <ul className="list-disc list-inside space-y-2 text-gray-700">
-                        <li>Premier podium pour Piastri au GP de Monaco</li>
-                        <li>Record de victoires consécutives pour Verstappen (9)</li>
-                        <li>Retour de Ricciardo chez Red Bull Racing</li>
-                        <li>Mercedes confirme son retour en forme avec 3 victoires</li>
-                        <li>Ferrari révèle sa nouvelle stratégie pour 2026</li>
-                    </ul>
-                </div>
+                <section className="bg-[#1f1f29] rounded-xl p-6 border border-[#333]">
+                    <div className="flex justify-between items-center mb-4">
+                        <h2 className="text-lg font-bold text-gray-400 flex items-center gap-2">
+                            🏎️ <span className="uppercase tracking-widest">Championnat Constructeurs</span>
+                        </h2>
+                        <span className="text-[var(--f1-red)] text-sm font-bold">Tout voir →</span>
+                    </div>
+                    <div className="space-y-3">
+                        {constructorStandings.map((team, index) => (
+                            <ConstructorStandingRow key={team.name || index} team={team} position={index + 1} compact />
+                        ))}
+                    </div>
+                </section>
             </div>
         </div>
     );

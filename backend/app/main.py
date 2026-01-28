@@ -1,39 +1,72 @@
+"""
+F1 Dashboard Backend
+FastAPI server for telemetry data processing via FastF1
+"""
+
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import fastf1
+
 from app.api import telemetry
 
-app = FastAPI()
+# =============================================================================
+# App Configuration
+# =============================================================================
 
-# Enable CORS
+app = FastAPI(
+    title="F1 Dashboard API",
+    description="Backend API for F1 telemetry and data analysis",
+    version="1.0.0"
+)
+
+# =============================================================================
+# CORS Configuration
+# =============================================================================
+
+ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173"
+]
+
 app.add_middleware(
     CORSMiddleware,
-    # 🔒 Security: In production, strictly allow only your frontend domain
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173"
-    ], 
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )
 
-# Enable cache for FastF1 (create 'cache' dir in backend root or local)
-# Enable cache for FastF1
-import os
-cache_dir = os.path.join(os.getcwd(), 'cache')
-if not os.path.exists(cache_dir):
-    os.makedirs(cache_dir)
-fastf1.Cache.enable_cache(cache_dir) 
+# =============================================================================
+# FastF1 Cache Setup
+# =============================================================================
+
+CACHE_DIR = os.path.join(os.path.dirname(__file__), "..", "cache")
+
+if not os.path.exists(CACHE_DIR):
+    os.makedirs(CACHE_DIR)
+
+fastf1.Cache.enable_cache(CACHE_DIR)
+
+# =============================================================================
+# Routes
+# =============================================================================
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok", "fastf1_version": fastf1.__version__}
+    """Health check endpoint"""
+    return {
+        "status": "healthy",
+        "fastf1_version": fastf1.__version__
+    }
 
-# Include routers
-app.include_router(telemetry.router, prefix="/api")
+# Include telemetry router
+app.include_router(telemetry.router, prefix="/api", tags=["Telemetry"])
+
+# =============================================================================
+# Development Server
+# =============================================================================
 
 if __name__ == "__main__":
     import uvicorn
-    # If running directly, assume we are inside 'backend' folder
     uvicorn.run("app.main:app", host="0.0.0.0", port=8000, reload=True)
