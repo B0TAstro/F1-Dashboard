@@ -1,27 +1,28 @@
-name: Frontend Lint
+name: 🔍 Static Checks
 
 on:
-  push:
-    branches-ignore: []  # Triggers on push to any branch
   pull_request:
-    branches: [ main ]   # Triggers on PR to main
+    types: [opened, synchronize, reopened, ready_for_review]
+  push:
+    branches: [main]
 
 jobs:
   lint:
+    name: 🪄 Check lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: 🧰 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: 📥 Install dependencies
         run: cd frontend && npm ci
 
-      - name: Run ESLint
+      - name: 🔍 Check lint
         run: cd frontend && npm run lint

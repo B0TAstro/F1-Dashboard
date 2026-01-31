@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: 🚀 Deploy on Pages
 
 on:
   push:
@@ -17,36 +17,40 @@ concurrency:
 
 jobs:
   build:
+    name: 🏗️ Build
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: ⬇️ Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
+      - name: 🧰 Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
 
-      - name: Install dependencies
+      - name: 📥 Install dependencies
         run: cd frontend && npm ci
 
-      - name: Build
+      - name: 🏗️ Build (Vite)
         run: cd frontend && npm run build
+        env:
+          VITE_BASE_PATH: "/F1-Dashboard/"
 
-      - name: Upload artifact
+      - name: 📤 Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: frontend/dist
 
   deploy:
+    name: 🚀 Deploy to GitHub Pages
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
+      - name: 🚀 Deploy
         id: deployment
         uses: actions/deploy-pages@v4
