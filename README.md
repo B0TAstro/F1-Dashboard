@@ -18,6 +18,55 @@ The project is structured into two distinct parts (Monorepo):
 *   **`/frontend`**: The user interface (React, Tailwind, Recharts)
 *   **`/backend`**: The server API (FastAPI, Python, FastF1) which handles data such as telemetry
 
+## Roadmap 🗺️
+
+### Deployment & DevOps
+- [ ] Deploy frontend to GitHub Pages
+- [ ] Implement CI workflow to auto-deploy on merge to `main`
+- [ ] Configure custom domain name
+- [ ] Deploy on the web
+- [ ] Set up backend deployment (Heroku/AWS)
+
+### Core Experience & UI
+- [ ] Add GSAP for animations
+- [ ] Implement complete UI
+- [ ] Integrate historical assets (Cars, Logos, Drivers) for different eras
+- [ ] Add Internationalization (i18n) - FR/EN
+- [ ] Add Light/Dark mode toggle
+
+### Features by Page
+
+#### 🏠 Home
+- [ ] Finalize UI polish
+- [ ] Add GSAP entrance animations
+- [ ] Add "Latest News" mini-section
+
+#### 📅 Calendar
+- [ ] Improve weekend navigation (better visual indicators)
+- [ ] Add "Weekly Schedule" layout (precise times & broadcast links)
+
+#### 🏆 Standings (Drivers/Constructors)
+- [ ] Finalize UI polish
+- [ ] Add Sorting options (Points, Name, Team, etc.)
+- [ ] Add Year Selector (Historical data)
+
+#### 🏎️ Teams
+- [ ] Finalize UI polish
+- [ ] Add interactive Team details on click:
+    - [ ] Season stats (Podiums, Avg. Position)
+    - [ ] Drivers & Team Principal info
+    - [ ] Visual animations
+
+#### ⏯️ Replay
+- [ ] Integrate Three.js for 3D race visualization
+- [ ] Add Period Selector (Race & Year)
+- [ ] Display detailed telemetry metrics
+
+#### 📰 News (New)
+- [ ] Create dedicated News page (aggregated F1 articles)
+- [ ] Add CMS capabilities for writing custom articles
+- [ ] Implement search & filter options
+
 ## Quick Start
 
 To launch the complete project, you must start both the backend and the frontend simultaneously.
