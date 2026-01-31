@@ -7,9 +7,9 @@
 This project is a "Dashboard" web application dedicated to Formula 1
 It was created with the goal of **practicing Fullstack development** (React + Python) and exploring sports data visualization !
 
-**⚠️ Disclaimer:**
-*   We have drawn inspiration from the **official F1 Art Direction** (typography, colors, 'leaning' style, Dark Mode) to create an immersive experience
-*   It is not affiliated with the Formula 1 companies
+> **Disclaimer :**
+>
+> I have drawn inspiration from the **official F1 Art Direction** (typography, colors, 'leaning' style, Dark Mode) but it's not affiliated with the Formula 1 companies.
 
 ## Architecture
 
@@ -59,12 +59,16 @@ The project is structured into two distinct parts (Monorepo):
 
 #### ⏯️ Replay
 - [ ] Integrate Three.js for 3D race visualization
+    - [ ] Add 3D track model
+    - [ ] Add car models with team liveries
+    - [ ] Animate car
+    - [ ] Implement camera controls (global, pov)
 - [ ] Add Period Selector (Race & Year)
 - [ ] Display detailed telemetry metrics
 
-#### 📰 News (New)
+#### 📰 News
 - [ ] Create dedicated News page (aggregated F1 articles)
-- [ ] Add CMS capabilities for writing custom articles
+- [ ] Add capabilities for writing custom articles
 - [ ] Implement search & filter options
 
 ## Quick Start
@@ -79,7 +83,7 @@ cd backend
 pip3 install -r requirements.txt
 python3 run.py
 ```
-*The server will be accessible at `http://127.0.0.1:8000`.*
+*The server will be accessible at `http://127.0.0.1:8000`*
 
 ### 2. Frontend (React)
 ```bash
@@ -87,14 +91,13 @@ cd frontend
 npm install
 npm run dev
 ```
-Then open your browser at `http://localhost:5173`.
+*Then open your browser at `http://localhost:5173`*
 
 ## Tech Stack
 
 *   **Frontend**: React 19, Vite, TailwindCSS v4, Recharts, Axios
 *   **Backend**: Python 3.13, FastAPI, FastF1, Pandas
 *   **External APIs**: OpenF1 (Stats), FastF1 (Telemetry & Live Timing)
-*   **Design**: Global Dark Theme (`#15151E`), Official Fonts (Titillium Web, Outfit)
 
 ## Security and Data
 
