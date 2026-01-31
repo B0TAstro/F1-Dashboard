@@ -1,4 +1,4 @@
-# F1 Dashboard - Backend 🐍
+# F1 Dashboard 🏎️ - Backend
 
 This folder contains the Python server responsible for processing "heavy" and specific data that the frontend cannot easily handle alone (e.g., processing large telemetry files)
 
