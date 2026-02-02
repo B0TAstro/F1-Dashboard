@@ -38,7 +38,6 @@ const CircuitMap = ({ year, race, session = 'R' }) => {
         if (!telemetry || !canvasRef.current) return;
 
         const canvas = canvasRef.current;
-        const ctx = canvas.getContext('2d');
         const width = canvas.width;
         const height = canvas.height;
 

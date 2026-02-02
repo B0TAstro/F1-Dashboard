@@ -7,7 +7,7 @@ import CircuitMap from '../components/CircuitMap';
 
 function Replay() {
     const [session, setSession] = useState(null);
-    const [results, setResults] = useState([]);
+
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -19,12 +19,11 @@ function Replay() {
                 setSession(currentSession);
 
                 if (currentSession && currentSession.session_key) {
-                    const sessionResults = await fetchSessionResults(currentSession.session_key);
-                    setResults(sessionResults);
+                    await fetchSessionResults(currentSession.session_key);
                 }
 
                 setLoading(false);
-            } catch (err) {
+            } catch {
                 setError('Erreur lors de la récupération des données');
                 setLoading(false);
             }
