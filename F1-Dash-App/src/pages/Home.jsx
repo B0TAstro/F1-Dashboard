@@ -1,22 +1,20 @@
 // pages/Home.jsx
 import React, { useState, useEffect, useRef } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchMeetings, fetchDriverStandings, fetchConstructorStandings } from '../api/openF1Api';
 import { F1_2026_TEAMS, F1_2026_DRIVERS } from '../constants/f1Data';
-import PageHeader from '../components/PageHeader';
 import RaceCard from '../components/RaceCard';
 import { DriverStandingRow, ConstructorStandingRow } from '../components/StandingRow';
 import gsap from 'gsap';
 
 function Home() {
-    const [lastRaces, setLastRaces] = useState([]);
-    const [nextRace, setNextRace] = useState(null);
+    const [upcomingRaces, setUpcomingRaces] = useState([]);
     const [driverStandings, setDriverStandings] = useState([]);
     const [constructorStandings, setConstructorStandings] = useState([]);
     const [loading, setLoading] = useState(true);
     const [currentYear] = useState(new Date().getFullYear());
 
     // Refs for GSAP
-    const headerRef = useRef(null);
     const newsRef = useRef(null);
     const racesRef = useRef(null);
     const standingsRef = useRef(null);
@@ -25,45 +23,44 @@ function Home() {
         const loadData = async () => {
             setLoading(true);
             try {
-                // Fetch last 3 races from previous year
-                const prevYearMeetings = await fetchMeetings(currentYear - 1).catch(() => []);
-                const pastMeetings = prevYearMeetings
-                    .filter(m => new Date(m.date_start) < new Date())
-                    .sort((a, b) => new Date(b.date_start) - new Date(a.date_start))
-                    .slice(0, 3)
-                    .reverse();
-                setLastRaces(pastMeetings);
+                // Fetch races for current year (2026)
+                const meetings = await fetchMeetings(currentYear).catch(() => []);
+                const futureMeetings = meetings
+                    .filter(m => {
+                        const endDate = new Date(m.meeting_end_date || m.date_end || new Date(m.date_start).getTime() + 3 * 24 * 60 * 60 * 1000);
+                        return endDate > new Date();
+                    }) // Future or Active races
+                    .sort((a, b) => new Date(a.date_start) - new Date(b.date_start)) // Sort by date ascending
+                    .slice(0, 4); // Take next 4 races
 
-                // Fetch next race from current year
-                const currentYearMeetings = await fetchMeetings(currentYear).catch(() => []);
-                const futureMeetings = currentYearMeetings
-                    .filter(m => new Date(m.date_start) > new Date())
-                    .sort((a, b) => new Date(a.date_start) - new Date(b.date_start));
-                setNextRace(futureMeetings[0] || null);
+                setUpcomingRaces(futureMeetings);
 
                 // Fetch Standings
-                const drivers = await fetchDriverStandings(currentYear).catch(() => []);
-                const constructors = await fetchConstructorStandings(currentYear).catch(() => []);
+                // Always try 2026 first. OpenF1 usually returns empty or error if season hasn't started.
+                let drivers = await fetchDriverStandings(currentYear).catch(() => []);
+                let constructors = await fetchConstructorStandings(currentYear).catch(() => []);
 
-                if (drivers.length > 0) {
-                    setDriverStandings(drivers.slice(0, 4));
-                } else {
+                // If empty or error, use fallback with 0 points
+                if (!drivers || drivers.length === 0) {
                     const fallbackDrivers = F1_2026_DRIVERS
                         .map((d) => ({ ...d, points: 0 }))
                         .sort((a, b) => a.name.localeCompare(b.name))
-                        .slice(0, 4);
+                        .slice(0, 5); // Top 5
                     setDriverStandings(fallbackDrivers);
+                } else {
+                    setDriverStandings(drivers.slice(0, 5));
                 }
 
-                if (constructors.length > 0) {
-                    setConstructorStandings(constructors.slice(0, 4));
-                } else {
+                if (!constructors || constructors.length === 0) {
                     const fallbackTeams = F1_2026_TEAMS
                         .map((t) => ({ ...t, points: 0 }))
                         .sort((a, b) => a.name.localeCompare(b.name))
-                        .slice(0, 4);
+                        .slice(0, 5); // Top 5
                     setConstructorStandings(fallbackTeams);
+                } else {
+                    setConstructorStandings(constructors.slice(0, 5));
                 }
+
             } catch (err) {
                 console.error('Error loading home data:', err);
             }
@@ -77,11 +74,8 @@ function Home() {
         if (!loading) {
             const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
 
-            if (headerRef.current) {
-                tl.fromTo(headerRef.current, { opacity: 0, y: -20 }, { opacity: 1, y: 0, duration: 0.6 });
-            }
             if (newsRef.current) {
-                tl.fromTo(newsRef.current, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6 }, "-=0.4");
+                tl.fromTo(newsRef.current, { opacity: 0, x: -20 }, { opacity: 1, x: 0, duration: 0.6 });
             }
             if (racesRef.current) {
                 tl.fromTo(racesRef.current.children,
@@ -109,15 +103,13 @@ function Home() {
     }
 
     return (
-        <div className="space-y-8 pb-10">
-            <div ref={headerRef}>
-                <PageHeader title="Accueil" rightElement={currentYear} />
-            </div>
+        <div className="space-y-8 pb-10 pt-4">
 
-            {/* LATEST NEWS MINI-SECTION */}
-            <div ref={newsRef} className="bg-gradient-to-r from-[#1f1f29] to-transparent border-l-4 border-[var(--f1-red)] p-4 rounded-r-xl">
-                <h3 className="text-sm font-bold text-[var(--f1-red)] uppercase tracking-widest mb-1">Dernières News</h3>
-                <p className="text-white italic text-lg">
+            {/* LATEST NEWS MINI-SECTION - MOCK */}
+            <div ref={newsRef} className="bg-gradient-to-r from-[#1f1f29] to-transparent border-l-4 border-[var(--f1-red)] p-4 rounded-r-xl relative overflow-hidden group">
+                <div className="absolute top-2 right-2 px-2 py-0.5 bg-yellow-500/20 text-yellow-500 text-[10px] font-bold uppercase rounded border border-yellow-500/30">Mock Data</div>
+                <h3 className="text-sm font-bold text-[var(--f1-red)] uppercase tracking-widest mb-1">À la une</h3>
+                <p className="text-white italic text-lg md:text-xl">
                     "La saison {currentYear} s'annonce explosive avec les nouvelles réglementations techniques qui rebattent les cartes !"
                 </p>
                 <div className="flex gap-4 mt-2 text-xs text-gray-500 font-mono">
@@ -127,20 +119,51 @@ function Home() {
                 </div>
             </div>
 
-            {/* RACES GRID */}
+            {/* UPCOMING RACES GRID */}
             <section className="bg-[#1f1f29] rounded-xl p-6 border border-[#333]">
                 <h2 className="text-lg font-bold text-gray-400 mb-4 flex items-center gap-2">
-                    🏁 <span className="uppercase tracking-widest">Dernières Courses</span>
+                    🗓️ <span className="uppercase tracking-widest">Prochaines Courses</span>
                 </h2>
                 <div ref={racesRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {lastRaces.map((race, index) => (
-                        <RaceCard key={race.meeting_key || index} race={race} isNext={false} raceNumber={`R${index + 1}`} />
-                    ))}
-                    {nextRace ? (
-                        <RaceCard race={nextRace} isNext={true} raceNumber="NEXT" />
+                    {upcomingRaces.length > 0 ? (
+                        (() => {
+                            let raceCounter = 0;
+                            let testCounter = 0;
+
+                            return upcomingRaces.map((race, index) => {
+                                const now = new Date();
+                                const startDate = new Date(race.date_start);
+                                const endDate = new Date(race.meeting_end_date || race.date_end || startDate.getTime() + 3 * 24 * 60 * 60 * 1000); // Fallback to +3 days if no end date
+
+                                const isTesting = race.meeting_name.toLowerCase().includes('test');
+                                let label;
+
+                                if (isTesting) {
+                                    testCounter++;
+                                    label = `T${testCounter}`;
+                                } else {
+                                    raceCounter++;
+                                    label = `R${raceCounter}`;
+                                }
+
+                                const isLive = index === 0 || (now >= startDate && now <= endDate); // DEBUG: Force first race LIVE
+                                const isNext = index === 0;
+
+                                return (
+                                    <RaceCard
+                                        key={race.meeting_key || index}
+                                        race={race}
+                                        isNext={isNext}
+                                        isLive={isLive}
+                                        raceNumber={label}
+                                    />
+                                );
+                            });
+                        })()
                     ) : (
-                        <div className="bg-gradient-to-br from-[#15151E] to-[#1f1f29] rounded-lg p-4 border border-dashed border-[#444] flex items-center justify-center min-h-[120px]">
-                            <span className="text-gray-500 italic">Calendrier 2026 à venir...</span>
+                        <div className="col-span-full bg-gradient-to-br from-[#15151E] to-[#1f1f29] rounded-lg p-8 border border-dashed border-[#444] flex flex-col items-center justify-center min-h-[120px] text-center">
+                            <span className="text-gray-400 font-bold text-lg mb-1">Calendrier {currentYear} indisponible pour le moment.</span>
+                            <span className="text-gray-600 italic text-sm">Les données de la saison à venir seront bientôt disponibles.</span>
                         </div>
                     )}
                 </div>
@@ -153,7 +176,9 @@ function Home() {
                         <h2 className="text-lg font-bold text-gray-400 flex items-center gap-2">
                             🏆 <span className="uppercase tracking-widest">Championnat Pilotes</span>
                         </h2>
-                        <span className="text-[var(--f1-red)] text-sm font-bold cursor-pointer hover:underline">Tout voir →</span>
+                        <Link to="/standings/drivers" className="text-[var(--f1-red)] text-sm font-bold hover:underline">
+                            Tout voir →
+                        </Link>
                     </div>
                     <div className="space-y-3">
                         {driverStandings.map((driver, index) => (
@@ -167,7 +192,9 @@ function Home() {
                         <h2 className="text-lg font-bold text-gray-400 flex items-center gap-2">
                             🏎️ <span className="uppercase tracking-widest">Championnat Constructeurs</span>
                         </h2>
-                        <span className="text-[var(--f1-red)] text-sm font-bold cursor-pointer hover:underline">Tout voir →</span>
+                        <Link to="/standings/constructors" className="text-[var(--f1-red)] text-sm font-bold hover:underline">
+                            Tout voir →
+                        </Link>
                     </div>
                     <div className="space-y-3">
                         {constructorStandings.map((team, index) => (

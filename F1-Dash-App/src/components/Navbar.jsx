@@ -20,9 +20,6 @@ const Navbar = () => {
             </NavLink>
 
             <div className="flex items-center gap-8">
-                <NavLink to="/" className={navLinkClasses}>
-                    Accueil
-                </NavLink>
 
                 {/* Classement Dropdown */}
                 <div className="relative">
