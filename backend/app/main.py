@@ -8,6 +8,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import fastf1
 
+from fastapi.responses import RedirectResponse
 from app.api import telemetry
 
 # =============================================================================
@@ -60,6 +61,10 @@ def health_check():
         "status": "healthy",
         "fastf1_version": fastf1.__version__
     }
+
+@app.get("/")
+def read_root():
+    return RedirectResponse(url="/api/health")
 
 # Include telemetry router
 app.include_router(telemetry.router, prefix="/api", tags=["Telemetry"])
