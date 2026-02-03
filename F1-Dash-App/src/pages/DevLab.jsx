@@ -1,6 +1,7 @@
 // pages/DevLab.jsx
 import React, { useState } from 'react';
 import axios from 'axios';
+import { fetchLapTelemetry } from '../api/f1BackendApi';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
@@ -34,12 +35,10 @@ function DevLab() {
     const fetchFastF1Telemetry = async () => {
         setLoading(true);
         try {
-            const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-            // Hardcoded demo session (Bahrain 2023) because we know it exists
-            const res = await axios.get(`${BACKEND_URL}/api/lap_telemetry/2023/Bahrain/R/${driver}`);
-            setTelemetryData(res.data);
-        } catch (err) {
-            console.error(err);
+            // Hardcoded demo session (Bahrain 2023)
+            const data = await fetchLapTelemetry(2023, 'Bahrain', 'R', driver);
+            setTelemetryData(data);
+        } catch {
             setTelemetryData(null);
             const BACKEND_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
             alert(`Erreur Backend: Impossible de joindre ${BACKEND_URL}. Le serveur Python est-il lancé ?`);

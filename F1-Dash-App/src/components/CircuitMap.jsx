@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import axios from 'axios';
+import { fetchTelemetry } from '../api/f1BackendApi';
 
 const CircuitMap = ({ year, race, session = 'R' }) => {
     const [telemetry, setTelemetry] = useState(null);
@@ -21,8 +22,8 @@ const CircuitMap = ({ year, race, session = 'R' }) => {
                 const r = race || 'Bahrain';
 
                 // Call the Python backend
-                const response = await axios.get(`http://localhost:8000/api/telemetry/${y}/${r}/${session}`);
-                setTelemetry(response.data);
+                const data = await fetchTelemetry(y, r, session);
+                setTelemetry(data);
                 setLoading(false);
             } catch (err) {
                 console.error("Failed to fetch telemetry", err);
