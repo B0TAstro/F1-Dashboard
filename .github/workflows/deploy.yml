@@ -33,16 +33,11 @@ jobs:
       - name: 📥 Install
         run: cd F1-Dash-App && npm ci
 
-      - name: 🏗️ Build (Vite)
+      - name: 🏗️ Build
         run: cd F1-Dash-App && npm run build
         env:
           VITE_BASE_PATH: "/F1-Dashboard/"
           VITE_API_URL: ${{ secrets.RENDER_BACKEND_URL }}
-
-      - name: 📤 Upload artifact
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: F1-Dash-App/dist
 
   deploy-frontend:
     name: 🖥️ Frontend — Deploy to Pages
