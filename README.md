@@ -21,8 +21,8 @@ The project is structured into two distinct parts (Monorepo):
 ## Roadmap 🗺️
 
 ### Deployment & DevOps
-- [ ] Deploy frontend to GitHub Pages
-- [ ] Implement CI workflow to auto-deploy on merge to `main`
+- [X] Deploy frontend to GitHub Pages
+- [X] Implement CI workflow to auto-deploy on merge to `main`
 - [ ] Configure custom domain name
 - [ ] Deploy on the web
 - [ ] Set up backend deployment (Heroku/AWS)
