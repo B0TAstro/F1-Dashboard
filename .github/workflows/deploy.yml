@@ -39,6 +39,11 @@ jobs:
           VITE_BASE_PATH: "/F1-Dashboard/"
           VITE_API_URL: ${{ secrets.RENDER_BACKEND_URL }}
 
+      - name: 📤 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: F1-Dash-App/dist
+
   deploy-frontend:
     name: 🖥️ Frontend — Deploy to Pages
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
