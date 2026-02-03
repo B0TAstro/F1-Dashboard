@@ -2,6 +2,10 @@
 
 @import "tailwindcss";
 
+/* * {
+  outline: 1px solid red;
+} */
+
 :root {
   --f1-red: #FF1801;
   --f1-black: #15151E;
