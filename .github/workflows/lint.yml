@@ -1,4 +1,4 @@
-name: 🔍 Static Checks
+name: 🔍 Lint
 
 on:
   pull_request:
@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  lint:
+  lint-frontend:
     name: 🪄 Check lint
     runs-on: ubuntu-latest
     steps:
@@ -18,11 +18,11 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: "20"
-          cache: 'npm'
+          cache: npm
           cache-dependency-path: F1-Dash-App/package-lock.json
 
-      - name: 📥 Install dependencies
+      - name: 📥 Install
         run: cd F1-Dash-App && npm ci
 
-      - name: 🔍 Check lint
+      - name: 🔍 Lint
         run: cd F1-Dash-App && npm run lint
