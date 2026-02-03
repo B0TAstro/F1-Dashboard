@@ -64,7 +64,7 @@ def health_check():
 
 @app.get("/")
 def read_root():
-    return RedirectResponse(url="/api/health")
+    return {"status": "online", "message": "F1 Dashboard Backend is running"}
 
 # Include telemetry router
 app.include_router(telemetry.router, prefix="/api", tags=["Telemetry"])
