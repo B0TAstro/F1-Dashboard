@@ -1,5 +1,4 @@
 import React, { useEffect, useState, useRef } from 'react';
-import axios from 'axios';
 import { fetchTelemetry } from '../api/f1BackendApi';
 
 const CircuitMap = ({ year, race, session = 'R' }) => {
@@ -14,7 +13,7 @@ const CircuitMap = ({ year, race, session = 'R' }) => {
     const [offset, setOffset] = useState({ x: 0, y: 0 });
 
     useEffect(() => {
-        const fetchTelemetry = async () => {
+        const loadTelemetry = async () => {
             try {
                 setLoading(true);
                 // Default to a known race if parameters are missing for demo
@@ -32,7 +31,7 @@ const CircuitMap = ({ year, race, session = 'R' }) => {
             }
         };
 
-        fetchTelemetry();
+        loadTelemetry();
     }, [year, race, session]);
 
     useEffect(() => {
