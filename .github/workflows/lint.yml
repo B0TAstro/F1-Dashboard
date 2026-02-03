@@ -12,17 +12,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: ⬇️ Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: 🧰 Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "20"
           cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          cache-dependency-path: F1-Dash-App/package-lock.json
 
       - name: 📥 Install dependencies
-        run: cd frontend && npm ci
+        run: cd F1-Dash-App && npm ci
 
       - name: 🔍 Check lint
-        run: cd frontend && npm run lint
+        run: cd F1-Dash-App && npm run lint

@@ -15,7 +15,7 @@ It was created with the goal of **practicing Fullstack development** (React + Py
 
 The project is structured into two distinct parts (Monorepo):
 
-*   **`/frontend`**: The user interface (React, Tailwind, Recharts)
+*   **`/F1-Dash-App`**: The user interface (React, Tailwind, Recharts)
 *   **`/backend`**: The server API (FastAPI, Python, FastF1) which handles data such as telemetry
 
 ## Roadmap 🗺️
@@ -87,7 +87,7 @@ python3 run.py
 
 ### 2. Frontend (React)
 ```bash
-cd frontend
+cd F1-Dash-App
 npm install
 npm run dev
 ```
