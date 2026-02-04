@@ -1,35 +1,23 @@
-import React from 'react'
+const COUNTRY_IMAGE_MAP = {
+    'united states': 'usa',
+    'great britain': 'uk',
+    'united arab emirates': 'uae',
+    'testing': 'pre-season-testing'
+};
+
+const formatDateRange = (start, end) => {
+    const s = new Date(start);
+    const e = new Date(end || start);
+    const startDay = s.getDate().toString().padStart(2, '0');
+    const endDay = e.getDate().toString().padStart(2, '0');
+    const month = s.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase();
+    return `${startDay} - ${endDay} ${month}`;
+};
 
 export function RaceCard({ race, isNext, isLive, raceNumber }) {
-    const formatDateRange = (start, end) => {
-        const s = new Date(start);
-        const e = new Date(end || start);
-        const startDay = s.getDate().toString().padStart(2, '0');
-        const endDay = e.getDate().toString().padStart(2, '0');
-        const month = s.toLocaleDateString('fr-FR', { month: 'short' }).toUpperCase();
-        return `${startDay} - ${endDay} ${month}`;
-    };
-
-
-    // Map API Country names to User's specific file names (without extension)
-    const COUNTRY_IMAGE_MAP = {
-        'united states': 'usa',
-        'great britain': 'uk',
-        'united arab emirates': 'uae',
-        'saudi arabia': 'saudi arabia', // Filesystem has space
-        'testing': 'pre-season-testing'
-    };
-
     const normalizedCountry = race.country_name?.toLowerCase();
     const isTesting = race.meeting_name?.toLowerCase().includes('test');
-
-    // Determine filename: Check map first, then fallback to slug (space -> dash)
-    // Note: User provided .webp files
     let filename = isTesting ? COUNTRY_IMAGE_MAP['testing'] : (COUNTRY_IMAGE_MAP[normalizedCountry] || normalizedCountry.replace(/\s+/g, '-'));
-
-    // Handle specific file naming edge cases found in directory
-    if (filename === 'saudi-arabia') filename = 'saudi arabia'; // Handle file with space if map didn't catch it
-
     const imagePath = `/flags/${filename}.webp`;
 
     return (

@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
+import gsap from 'gsap';
+import { Calendar, Trophy, Car, ChevronRight, Newspaper } from 'lucide-react';
 import { fetchMeetings, fetchDriverStandings, fetchConstructorStandings } from '../api/openF1Api';
 import { F1_2026_TEAMS, F1_2026_DRIVERS } from '../constants/f1Data';
 import RaceCard from '../components/RaceCard';
 import { DriverStandingRow, ConstructorStandingRow } from '../components/StandingRow';
-import gsap from 'gsap';
-import { Calendar, Trophy, Car, ChevronRight, Newspaper } from 'lucide-react';
 
 function Home() {
     const [upcomingRaces, setUpcomingRaces] = useState([]);
@@ -95,6 +95,33 @@ function Home() {
             </div>
         );
     }
+    
+    const processedRaces = (() => {
+        let raceCounter = 0;
+        let testCounter = 0;
+
+        return upcomingRaces.map((race, index) => {
+            const now = new Date();
+            const startDate = new Date(race.date_start);
+            const endDate = new Date(race.meeting_end_date || race.date_end || startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
+
+            const isTesting = race.meeting_name.toLowerCase().includes('test');
+            let label;
+
+            if (isTesting) {
+                testCounter++;
+                label = `T${testCounter}`;
+            } else {
+                raceCounter++;
+                label = `R${raceCounter}`;
+            }
+
+            const isLive = now >= startDate && now <= endDate;
+            const isNext = index === 0;
+
+            return { ...race, label, isLive, isNext };
+        });
+    })();
 
     return (
         <div className="space-y-8 pb-10 pt-4">
@@ -119,41 +146,16 @@ function Home() {
                     <p className="uppercase tracking-widest">Prochaines Courses</p>
                 </h2>
                 <div ref={racesRef} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {upcomingRaces.length > 0 ? (
-                        (() => {
-                            let raceCounter = 0;
-                            let testCounter = 0;
-
-                            return upcomingRaces.map((race, index) => {
-                                const now = new Date();
-                                const startDate = new Date(race.date_start);
-                                const endDate = new Date(race.meeting_end_date || race.date_end || startDate.getTime() + 3 * 24 * 60 * 60 * 1000);
-
-                                const isTesting = race.meeting_name.toLowerCase().includes('test');
-                                let label;
-
-                                if (isTesting) {
-                                    testCounter++;
-                                    label = `T${testCounter}`;
-                                } else {
-                                    raceCounter++;
-                                    label = `R${raceCounter}`;
-                                }
-
-                                const isLive = now >= startDate && now <= endDate;
-                                const isNext = index === 0;
-
-                                return (
-                                    <RaceCard
-                                        key={race.meeting_key || index}
-                                        race={race}
-                                        isNext={isNext}
-                                        isLive={isLive}
-                                        raceNumber={label}
-                                    />
-                                );
-                            });
-                        })()
+                    {processedRaces.length > 0 ? (
+                        processedRaces.map((race, index) => (
+                            <RaceCard
+                                key={race.meeting_key || index}
+                                race={race}
+                                isNext={race.isNext}
+                                isLive={race.isLive}
+                                raceNumber={race.label}
+                            />
+                        ))
                     ) : (
                         <div className="col-span-full bg-linear-to-br from-[#15151E] to-[#1f1f29] rounded-lg p-8 border border-dashed border-[#444] flex flex-col items-center justify-center min-h-30 text-center">
                             <span className="text-gray-400 font-bold text-lg mb-1">Calendrier {currentYear} indisponible pour le moment</span>
