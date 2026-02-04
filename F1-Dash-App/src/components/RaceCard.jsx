@@ -11,11 +11,26 @@ export function RaceCard({ race, isNext, isLive, raceNumber }) {
     };
 
 
-    const countryName = race.country_name?.toLowerCase().replace(/\s+/g, '-') || 'default';
+    // Map API Country names to User's specific file names (without extension)
+    const COUNTRY_IMAGE_MAP = {
+        'united states': 'usa',
+        'great britain': 'uk',
+        'united arab emirates': 'uae',
+        'saudi arabia': 'saudi arabia', // Filesystem has space
+        'testing': 'pre-season-testing'
+    };
+
+    const normalizedCountry = race.country_name?.toLowerCase();
     const isTesting = race.meeting_name?.toLowerCase().includes('test');
-    const imagePath = isTesting
-        ? '/flags/pre-season-testing.webp'
-        : `/flags/${countryName}.png`;
+
+    // Determine filename: Check map first, then fallback to slug (space -> dash)
+    // Note: User provided .webp files
+    let filename = isTesting ? COUNTRY_IMAGE_MAP['testing'] : (COUNTRY_IMAGE_MAP[normalizedCountry] || normalizedCountry.replace(/\s+/g, '-'));
+
+    // Handle specific file naming edge cases found in directory
+    if (filename === 'saudi-arabia') filename = 'saudi arabia'; // Handle file with space if map didn't catch it
+
+    const imagePath = `/flags/${filename}.webp`;
 
     return (
         <div className={`relative rounded-lg p-4 min-h-40 flex flex-col justify-between overflow-hidden group ${isNext || isLive
@@ -26,7 +41,7 @@ export function RaceCard({ race, isNext, isLive, raceNumber }) {
             <img
                 src={imagePath}
                 onError={(e) => { e.target.onerror = null; e.target.src = '/flags/placeholder.webp'; }}
-                alt={countryName}
+                alt={race.country_name || 'Race Flag'}
                 className="absolute inset-0 w-full h-full object-cover opacity-40 grayscale transition-transform duration-500 group-hover:scale-110 pointer-events-none mix-blend-overlay"
             />
 

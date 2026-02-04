@@ -31,7 +31,7 @@ function Home() {
                     .sort((a, b) => new Date(a.date_start) - new Date(b.date_start))
                     .slice(0, 4);
 
-                setUpcomingRaces([]); // DEBUG: TEST EMPTY STATE
+                setUpcomingRaces(futureMeetings);
 
 
                 let drivers = await fetchDriverStandings(currentYear).catch(() => []);
