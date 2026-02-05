@@ -1,5 +1,3 @@
-// components/StandingRow.jsx
-import React from 'react';
 import { TEAM_COLORS } from '../constants/f1Data';
 
 export function DriverStandingRow({ driver, position, compact = false }) {

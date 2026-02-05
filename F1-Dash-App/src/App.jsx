@@ -1,7 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
+import Navbar from './components/global/Navbar';
+import Footer from './components/global/Footer';
 import Home from './pages/Home';
 import DriversStandings from './pages/DriversStandings';
 import ConstructorsStandings from './pages/ConstructorsStandings';

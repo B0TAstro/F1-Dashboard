@@ -37,9 +37,9 @@ The project is structured into two distinct parts (Monorepo):
 ### Features by Page
 
 #### 🏠 Home
-- [ ] Finalize UI polish
-- [ ] Add GSAP entrance animations
-- [ ] Add "Latest News" mini-section
+- [] Finalize UI polish
+- [X] Add GSAP entrance animations
+- [X] Add "Latest News" mini-section
 
 #### 📅 Calendar
 - [ ] Improve weekend navigation (better visual indicators)
